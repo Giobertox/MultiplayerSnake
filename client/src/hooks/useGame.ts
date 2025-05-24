@@ -237,9 +237,18 @@ export function useGame() {
       newState.activePlayers = newState.players.filter(p => p.isAlive).length;
 
       // Check game over
-      if (newState.activePlayers <= 1 && newState.players.length > 1) {
-        newState.isRunning = false;
-        setGameStatus('gameOver');
+      if (newState.players.length === 1) {
+        // Single player: game over when player dies
+        if (newState.activePlayers === 0) {
+          newState.isRunning = false;
+          setGameStatus('gameOver');
+        }
+      } else {
+        // Multiplayer: game over when only one or no players remain
+        if (newState.activePlayers <= 1) {
+          newState.isRunning = false;
+          setGameStatus('gameOver');
+        }
       }
 
       return newState;

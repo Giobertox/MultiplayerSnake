@@ -142,23 +142,29 @@ export function GameCanvas({ gameState, gameStatus, onStartGame, onRestartGame }
               {gameStatus === 'waiting' ? (
                 <>
                   <h2 className="text-4xl font-black text-accent mb-4 font-orbitron">PRESS SPACE TO START</h2>
-                  <p className="text-lg mb-8">Choose number of players: 2-4</p>
-                  <div className="flex space-x-4 justify-center">
+                  <p className="text-lg mb-8">Choose number of players: 1-4</p>
+                  <div className="flex space-x-3 justify-center">
+                    <Button 
+                      onClick={() => onStartGame(1)} 
+                      className="bg-accent text-white px-4 py-3 rounded font-bold hover:shadow-glow transition-all"
+                    >
+                      1 PLAYER
+                    </Button>
                     <Button 
                       onClick={() => onStartGame(2)} 
-                      className="bg-player1 text-black px-6 py-3 rounded font-bold hover:shadow-glow-green transition-all"
+                      className="bg-player1 text-black px-4 py-3 rounded font-bold hover:shadow-glow-green transition-all"
                     >
                       2 PLAYERS
                     </Button>
                     <Button 
                       onClick={() => onStartGame(3)} 
-                      className="bg-player2 text-white px-6 py-3 rounded font-bold hover:shadow-glow-red transition-all"
+                      className="bg-player2 text-white px-4 py-3 rounded font-bold hover:shadow-glow-red transition-all"
                     >
                       3 PLAYERS
                     </Button>
                     <Button 
                       onClick={() => onStartGame(4)} 
-                      className="bg-player3 text-white px-6 py-3 rounded font-bold hover:shadow-glow-blue transition-all"
+                      className="bg-player3 text-white px-4 py-3 rounded font-bold hover:shadow-glow-blue transition-all"
                     >
                       4 PLAYERS
                     </Button>
