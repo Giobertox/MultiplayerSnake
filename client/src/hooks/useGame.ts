@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameState, Player, Position, Direction, Food, GamePowerUp, GameStatus } from '@/types/game';
+import { apiRequest } from '@/lib/queryClient';
 
 const GRID_SIZE = 20;
 const CANVAS_WIDTH = 800;
