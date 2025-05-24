@@ -1,5 +1,6 @@
 import { GameState } from '@/types/game';
 import { Zap, Shield, Plus } from 'lucide-react';
+import { Leaderboard } from './Leaderboard';
 
 interface GameSidebarProps {
   gameState: GameState;
@@ -151,6 +152,9 @@ export function GameSidebar({ gameState }: GameSidebarProps) {
           </div>
         </div>
       </div>
+
+      {/* Leaderboard */}
+      <Leaderboard />
     </div>
   );
 }

@@ -63,6 +63,60 @@ export function useGame() {
   const lastTimeRef = useRef<number>(0);
   const gameTimeRef = useRef<number>(0);
 
+  const saveGameResults = useCallback(async (finalState: GameState) => {
+    try {
+      const gameId = `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Find winner (highest score)
+      const winner = finalState.players.reduce((prev, current) => 
+        (prev.score > current.score) ? prev : current
+      );
+
+      // Save individual scores for each player
+      for (let i = 0; i < finalState.players.length; i++) {
+        const player = finalState.players[i];
+        await fetch('/api/scores', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            playerName: `Player ${i + 1}`,
+            score: player.score,
+            gameTime: finalState.gameTime,
+            playerCount: finalState.players.length,
+            foodEaten: finalState.foodEaten,
+            powerupsUsed: finalState.powerupsUsed,
+            gameMode: 'classic'
+          })
+        });
+      }
+
+      // Save game result
+      await fetch('/api/games', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          gameId,
+          totalPlayers: finalState.players.length,
+          gameDuration: finalState.gameTime,
+          totalFoodEaten: finalState.foodEaten,
+          totalPowerupsUsed: finalState.powerupsUsed,
+          winnerName: `Player ${winner.id + 1}`,
+          playerScores: finalState.players.map((p, i) => ({
+            playerName: `Player ${i + 1}`,
+            score: p.score,
+            isAlive: p.isAlive
+          }))
+        })
+      });
+    } catch (error) {
+      console.log('Failed to save game results:', error);
+    }
+  }, []);
+
   const initializePlayers = useCallback((playerCount: number): Player[] => {
     const players: Player[] = [];
     for (let i = 0; i < playerCount; i++) {
@@ -243,18 +297,20 @@ export function useGame() {
         if (newState.activePlayers === 0) {
           newState.isRunning = false;
           setGameStatus('gameOver');
+          saveGameResults(newState);
         }
       } else {
         // Multiplayer: game over when only one or no players remain
         if (newState.activePlayers <= 1) {
           newState.isRunning = false;
           setGameStatus('gameOver');
+          saveGameResults(newState);
         }
       }
 
       return newState;
     });
-  }, [checkCollision, checkSnakeCollision, spawnFood, spawnPowerUp]);
+  }, [checkCollision, checkSnakeCollision, spawnFood, spawnPowerUp, saveGameResults]);
 
   const gameLoop = useCallback((currentTime: number) => {
     if (currentTime - lastTimeRef.current >= gameState.gameSpeed) {
