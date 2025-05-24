@@ -1,0 +1,208 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 233 69% 96%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+  
+  /* Game-specific colors */
+  --game-bg: 10 10% 4%; /* #0a0a0a */
+  --canvas-bg: 230 39% 13%; /* #1a1a2e */
+  --ui-dark: 230 47% 16%; /* #16213e */
+  --accent: 349 85% 60%; /* #e94560 */
+  --player1: 120 100% 50%; /* #00ff00 */
+  --player2: 344 100% 50%; /* #ff0040 */
+  --player3: 212 100% 50%; /* #0080ff */
+  --player4: 60 100% 50%; /* #ffff00 */
+  --powerup-speed: 18 100% 60%; /* #ff6b35 */
+  --powerup-invincible: 275 91% 40%; /* #7209b7 */
+  --powerup-length: 340 82% 62%; /* #f72585 */
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .font-orbitron {
+    font-family: 'Orbitron', monospace;
+  }
+  
+  .bg-game-bg {
+    background-color: hsl(var(--game-bg));
+  }
+  
+  .bg-canvas-bg {
+    background-color: hsl(var(--canvas-bg));
+  }
+  
+  .bg-ui-dark {
+    background-color: hsl(var(--ui-dark));
+  }
+  
+  .bg-accent {
+    background-color: hsl(var(--accent));
+  }
+  
+  .text-accent {
+    color: hsl(var(--accent));
+  }
+  
+  .border-accent {
+    border-color: hsl(var(--accent));
+  }
+  
+  .bg-player1 {
+    background-color: hsl(var(--player1));
+  }
+  
+  .bg-player2 {
+    background-color: hsl(var(--player2));
+  }
+  
+  .bg-player3 {
+    background-color: hsl(var(--player3));
+  }
+  
+  .bg-player4 {
+    background-color: hsl(var(--player4));
+  }
+  
+  .text-player1 {
+    color: hsl(var(--player1));
+  }
+  
+  .text-player2 {
+    color: hsl(var(--player2));
+  }
+  
+  .text-player3 {
+    color: hsl(var(--player3));
+  }
+  
+  .text-player4 {
+    color: hsl(var(--player4));
+  }
+  
+  .border-player1 {
+    border-color: hsl(var(--player1));
+  }
+  
+  .border-player2 {
+    border-color: hsl(var(--player2));
+  }
+  
+  .border-player3 {
+    border-color: hsl(var(--player3));
+  }
+  
+  .border-player4 {
+    border-color: hsl(var(--player4));
+  }
+  
+  .bg-powerup-speed {
+    background-color: hsl(var(--powerup-speed));
+  }
+  
+  .text-powerup-speed {
+    color: hsl(var(--powerup-speed));
+  }
+  
+  .border-powerup-speed {
+    border-color: hsl(var(--powerup-speed));
+  }
+  
+  .bg-powerup-invincible {
+    background-color: hsl(var(--powerup-invincible));
+  }
+  
+  .text-powerup-invincible {
+    color: hsl(var(--powerup-invincible));
+  }
+  
+  .border-powerup-invincible {
+    border-color: hsl(var(--powerup-invincible));
+  }
+  
+  .bg-powerup-length {
+    background-color: hsl(var(--powerup-length));
+  }
+  
+  .text-powerup-length {
+    color: hsl(var(--powerup-length));
+  }
+  
+  .border-powerup-length {
+    border-color: hsl(var(--powerup-length));
+  }
+  
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+  }
+  
+  .shadow-glow-green {
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+  }
+  
+  .shadow-glow-red {
+    box-shadow: 0 0 20px rgba(255, 0, 64, 0.3);
+  }
+  
+  .shadow-glow-blue {
+    box-shadow: 0 0 20px rgba(0, 128, 255, 0.3);
+  }
+  
+  .shadow-glow-yellow {
+    box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
+  }
+}
