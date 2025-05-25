@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameState, Player, Position, Direction, Food, GamePowerUp, GameStatus } from '@/types/game';
 import { apiRequest } from '@/lib/queryClient';
+import { useAudio } from './useAudio';
+import { useParticles } from './useParticles';
 
 const GRID_SIZE = 20;
 const CANVAS_WIDTH = 800;
@@ -42,6 +44,8 @@ const CONTROLS = {
 };
 
 export function useGame() {
+  const sounds = useAudio();
+  const { particles, effects } = useParticles();
   const [gameStatus, setGameStatus] = useState<GameStatus>('waiting');
   const [gameState, setGameState] = useState<GameState>({
     isRunning: false,
@@ -232,6 +236,9 @@ export function useGame() {
         
         if ((hitWall || hitOtherSnake) && player.powerups.invincible === 0) {
           player.isAlive = false;
+          // Visual and audio effects for death
+          effects.snakeDeath(head.x * GRID_SIZE + GRID_SIZE/2, head.y * GRID_SIZE + GRID_SIZE/2, player.color);
+          sounds.death();
           return;
         }
 
@@ -242,8 +249,13 @@ export function useGame() {
         if (foodIndex !== -1) {
           player.score += 10;
           player.length = player.segments.length;
+          const food = newState.food[foodIndex];
           newState.food.splice(foodIndex, 1);
           newState.foodEaten++;
+          
+          // Visual and audio effects for food eaten
+          effects.foodEaten(food.x * GRID_SIZE + GRID_SIZE/2, food.y * GRID_SIZE + GRID_SIZE/2);
+          sounds.eat();
           
           // Spawn new food
           newState.food.push(spawnFood(allSegments));
@@ -255,6 +267,10 @@ export function useGame() {
         const powerupIndex = newState.powerups.findIndex(powerup => powerup.x === head.x && powerup.y === head.y);
         if (powerupIndex !== -1) {
           const powerup = newState.powerups[powerupIndex];
+          
+          // Visual and audio effects for power-up collected
+          effects.powerupCollected(powerup.x * GRID_SIZE + GRID_SIZE/2, powerup.y * GRID_SIZE + GRID_SIZE/2, powerup.color);
+          sounds.powerup();
           
           switch (powerup.type) {
             case 'speed':
@@ -297,6 +313,7 @@ export function useGame() {
         if (newState.activePlayers === 0) {
           newState.isRunning = false;
           setGameStatus('gameOver');
+          sounds.gameOver();
           saveGameResults(newState);
         }
       } else {
@@ -304,6 +321,7 @@ export function useGame() {
         if (newState.activePlayers <= 1) {
           newState.isRunning = false;
           setGameStatus('gameOver');
+          sounds.gameOver();
           saveGameResults(newState);
         }
       }
@@ -349,9 +367,11 @@ export function useGame() {
     });
     
     setGameStatus('playing');
+    sounds.gameStart();
+    effects.gameStart(CANVAS_WIDTH/2, CANVAS_HEIGHT/2);
     gameTimeRef.current = 0;
     lastTimeRef.current = 0;
-  }, [initializePlayers, spawnFood]);
+  }, [initializePlayers, spawnFood, sounds, effects]);
 
   const togglePause = useCallback(() => {
     if (gameState.isRunning) {
