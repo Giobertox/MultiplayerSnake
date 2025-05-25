@@ -122,12 +122,37 @@ export function useGame() {
   }, []);
 
   const initializePlayers = useCallback((playerCount: number): Player[] => {
+    const gridWidth = Math.floor(CANVAS_WIDTH / GRID_SIZE);
+    const gridHeight = Math.floor(CANVAS_HEIGHT / GRID_SIZE);
+    
     const players: Player[] = [];
     for (let i = 0; i < playerCount; i++) {
+      const startPos = START_POSITIONS[i];
+      
+      // Calculate direction away from closest wall
+      const distanceToLeft = startPos.x;
+      const distanceToRight = gridWidth - startPos.x;
+      const distanceToTop = startPos.y;
+      const distanceToBottom = gridHeight - startPos.y;
+      
+      const minDistance = Math.min(distanceToLeft, distanceToRight, distanceToTop, distanceToBottom);
+      
+      let direction = { x: 1, y: 0 }; // default right
+      
+      if (minDistance === distanceToLeft) {
+        direction = { x: 1, y: 0 }; // move right (away from left wall)
+      } else if (minDistance === distanceToRight) {
+        direction = { x: -1, y: 0 }; // move left (away from right wall)
+      } else if (minDistance === distanceToTop) {
+        direction = { x: 0, y: 1 }; // move down (away from top wall)
+      } else if (minDistance === distanceToBottom) {
+        direction = { x: 0, y: -1 }; // move up (away from bottom wall)
+      }
+      
       players.push({
         id: i,
-        segments: [{ ...START_POSITIONS[i] }],
-        direction: { x: 1, y: 0 },
+        segments: [{ ...startPos }],
+        direction,
         color: PLAYER_COLORS[i],
         score: 0,
         length: 1,
@@ -225,6 +250,11 @@ export function useGame() {
       // Update each player
       newState.players.forEach(player => {
         if (!player.isAlive) return;
+
+        // Add continuous trail effects for moving snakes
+        if (Math.random() < 0.8) { // 80% chance for trail particles
+          effects.snakeTrail(player.segments, player.color);
+        }
 
         const head = { ...player.segments[0] };
         head.x += player.direction.x;

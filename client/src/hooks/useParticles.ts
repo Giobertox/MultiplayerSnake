@@ -48,6 +48,16 @@ export function useParticles() {
     setParticles(prev => [...prev, ...newParticles]);
   }, [createParticle]);
 
+  const spawnTrailParticles = useCallback((segments: Array<{x: number, y: number}>, color: string) => {
+    if (segments.length > 1) {
+      const tail = segments[segments.length - 1];
+      const newParticles = Array.from({ length: 3 }, () => 
+        createParticle(tail.x * 20 + 10, tail.y * 20 + 10, 'trail', color)
+      );
+      setParticles(prev => [...prev, ...newParticles]);
+    }
+  }, [createParticle]);
+
   const updateParticles = useCallback(() => {
     setParticles(prev => 
       prev.map(particle => ({
@@ -79,10 +89,11 @@ export function useParticles() {
   }, [particles.length, updateParticles]);
 
   const effects = {
-    foodEaten: (x: number, y: number) => spawnParticles(x, y, 8, 'sparkle', '#ff6b35'),
-    powerupCollected: (x: number, y: number, color: string) => spawnParticles(x, y, 12, 'powerup', color),
-    snakeDeath: (x: number, y: number, color: string) => spawnParticles(x, y, 15, 'explosion', color),
-    gameStart: (x: number, y: number) => spawnParticles(x, y, 20, 'sparkle', '#e94560'),
+    foodEaten: (x: number, y: number) => spawnParticles(x, y, 25, 'sparkle', '#ff6b35'),
+    powerupCollected: (x: number, y: number, color: string) => spawnParticles(x, y, 35, 'powerup', color),
+    snakeDeath: (x: number, y: number, color: string) => spawnParticles(x, y, 50, 'explosion', color),
+    gameStart: (x: number, y: number) => spawnParticles(x, y, 100, 'sparkle', '#e94560'),
+    snakeTrail: spawnTrailParticles,
   };
 
   return { particles, effects };

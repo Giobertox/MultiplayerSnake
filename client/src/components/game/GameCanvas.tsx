@@ -21,25 +21,46 @@ export function GameCanvas({ gameState, gameStatus, particles, onStartGame, onRe
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Clear canvas
-    ctx.fillStyle = '#1a1a2e';
+    // Dynamic background with pulsing effect
+    const time = Date.now() * 0.001;
+    const pulseIntensity = Math.sin(time * 2) * 0.1 + 0.9;
+    
+    // Gradient background
+    const gradient = ctx.createRadialGradient(
+      canvas.width / 2, canvas.height / 2, 0,
+      canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 2
+    );
+    gradient.addColorStop(0, `rgba(26, 26, 46, ${pulseIntensity})`);
+    gradient.addColorStop(1, `rgba(16, 16, 32, ${pulseIntensity})`);
+    
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Render grid
-    ctx.strokeStyle = '#2a2a3e';
+    // Enhanced animated grid with glow
+    ctx.strokeStyle = `rgba(42, 42, 62, ${0.6 + Math.sin(time * 3) * 0.2})`;
     ctx.lineWidth = 1;
+    ctx.shadowColor = '#2a2a3e';
+    ctx.shadowBlur = 2;
+    
     for (let x = 0; x <= canvas.width; x += gameState.gridSize) {
+      const lineAlpha = 0.3 + Math.sin(time * 2 + x * 0.01) * 0.2;
+      ctx.globalAlpha = lineAlpha;
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, canvas.height);
       ctx.stroke();
     }
     for (let y = 0; y <= canvas.height; y += gameState.gridSize) {
+      const lineAlpha = 0.3 + Math.sin(time * 2 + y * 0.01) * 0.2;
+      ctx.globalAlpha = lineAlpha;
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(canvas.width, y);
       ctx.stroke();
     }
+    
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
 
     // Render snakes with enhanced effects
     gameState.players.forEach(player => {
@@ -93,57 +114,160 @@ export function GameCanvas({ gameState, gameStatus, particles, onStartGame, onRe
       ctx.globalAlpha = 1;
     });
 
-    // Render food
-    ctx.fillStyle = '#ff6b35';
+    // Render food with spectacular effects
     gameState.food.forEach(food => {
-      const x = food.x * gameState.gridSize;
-      const y = food.y * gameState.gridSize;
+      const x = food.x * gameState.gridSize + gameState.gridSize/2;
+      const y = food.y * gameState.gridSize + gameState.gridSize/2;
+      
+      // Pulsing glow effect
+      const pulse = Math.sin(time * 8 + food.x + food.y) * 0.3 + 0.7;
+      const radius = gameState.gridSize/3 * pulse;
+      
+      // Outer glow
+      ctx.shadowColor = '#ff6b35';
+      ctx.shadowBlur = 20 * pulse;
+      
+      // Create gradient for food
+      const foodGradient = ctx.createRadialGradient(x, y, 0, x, y, radius * 2);
+      foodGradient.addColorStop(0, '#ffaa66');
+      foodGradient.addColorStop(0.7, '#ff6b35');
+      foodGradient.addColorStop(1, '#cc4422');
+      
+      ctx.fillStyle = foodGradient;
       ctx.beginPath();
-      ctx.arc(x + gameState.gridSize/2, y + gameState.gridSize/2, gameState.gridSize/3, 0, Math.PI * 2);
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fill();
+      
+      // Add sparkle effect
+      for (let i = 0; i < 6; i++) {
+        const angle = (time * 3 + i * Math.PI / 3) % (Math.PI * 2);
+        const sparkleX = x + Math.cos(angle) * radius * 1.5;
+        const sparkleY = y + Math.sin(angle) * radius * 1.5;
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.globalAlpha = Math.sin(time * 5 + i) * 0.5 + 0.5;
+        ctx.beginPath();
+        ctx.arc(sparkleX, sparkleY, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
     });
 
-    // Render power-ups
+    // Render power-ups with incredible effects
     gameState.powerups.forEach(powerup => {
-      const x = powerup.x * gameState.gridSize;
-      const y = powerup.y * gameState.gridSize;
+      const centerX = powerup.x * gameState.gridSize + gameState.gridSize/2;
+      const centerY = powerup.y * gameState.gridSize + gameState.gridSize/2;
       
-      ctx.fillStyle = powerup.color;
+      // Rotating and pulsing effects
+      const rotation = time * 2 + powerup.x + powerup.y;
+      const pulse = Math.sin(time * 6 + powerup.x * powerup.y) * 0.4 + 0.8;
+      const scale = pulse * 1.2;
+      
+      // Massive glow effect
       ctx.shadowColor = powerup.color;
-      ctx.shadowBlur = 15;
+      ctx.shadowBlur = 30 * pulse;
       
-      // Draw different shapes for different power-ups
+      // Energy ring around power-up
+      for (let ring = 0; ring < 3; ring++) {
+        const ringRadius = (gameState.gridSize * 0.7 * scale) + (ring * 8);
+        const ringAlpha = (0.3 - ring * 0.1) * pulse;
+        
+        ctx.globalAlpha = ringAlpha;
+        ctx.strokeStyle = powerup.color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, ringRadius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      
+      ctx.globalAlpha = 1;
+      
+      // Power-up core with gradient
+      const powerupGradient = ctx.createRadialGradient(
+        centerX, centerY, 0,
+        centerX, centerY, gameState.gridSize * 0.5 * scale
+      );
+      powerupGradient.addColorStop(0, '#ffffff');
+      powerupGradient.addColorStop(0.3, powerup.color);
+      powerupGradient.addColorStop(1, 'rgba(0,0,0,0.3)');
+      
+      ctx.fillStyle = powerupGradient;
+      
+      // Animated shapes based on type
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(rotation);
+      ctx.scale(scale, scale);
+      
       switch (powerup.type) {
         case 'speed':
-          // Lightning bolt shape
+          // Enhanced lightning bolt with animation
           ctx.beginPath();
-          ctx.moveTo(x + gameState.gridSize * 0.3, y + gameState.gridSize * 0.2);
-          ctx.lineTo(x + gameState.gridSize * 0.7, y + gameState.gridSize * 0.4);
-          ctx.lineTo(x + gameState.gridSize * 0.5, y + gameState.gridSize * 0.4);
-          ctx.lineTo(x + gameState.gridSize * 0.7, y + gameState.gridSize * 0.8);
-          ctx.lineTo(x + gameState.gridSize * 0.3, y + gameState.gridSize * 0.6);
-          ctx.lineTo(x + gameState.gridSize * 0.5, y + gameState.gridSize * 0.6);
+          ctx.moveTo(-6, -8);
+          ctx.lineTo(2, -2);
+          ctx.lineTo(-2, -2);
+          ctx.lineTo(6, 8);
+          ctx.lineTo(-2, 2);
+          ctx.lineTo(2, 2);
           ctx.closePath();
           ctx.fill();
-          break;
-        case 'invincible':
-          // Shield shape
-          ctx.beginPath();
-          ctx.arc(x + gameState.gridSize/2, y + gameState.gridSize/2, gameState.gridSize/3, 0, Math.PI * 2);
-          ctx.fill();
-          break;
-        case 'length':
-          // Plus sign
-          const size = gameState.gridSize * 0.6;
-          const thickness = size * 0.3;
-          const centerX = x + gameState.gridSize/2;
-          const centerY = y + gameState.gridSize/2;
           
-          ctx.fillRect(centerX - thickness/2, centerY - size/2, thickness, size);
-          ctx.fillRect(centerX - size/2, centerY - thickness/2, size, thickness);
+          // Lightning effects
+          for (let i = 0; i < 5; i++) {
+            const sparkAngle = (time * 10 + i * Math.PI * 0.4) % (Math.PI * 2);
+            const sparkX = Math.cos(sparkAngle) * 12;
+            const sparkY = Math.sin(sparkAngle) * 12;
+            
+            ctx.fillStyle = '#ffff00';
+            ctx.globalAlpha = Math.sin(time * 8 + i) * 0.5 + 0.5;
+            ctx.beginPath();
+            ctx.arc(sparkX, sparkY, 1, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          break;
+          
+        case 'invincible':
+          // Rotating shield with energy
+          ctx.beginPath();
+          ctx.arc(0, 0, 8, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Protective barrier effect
+          for (let i = 0; i < 8; i++) {
+            const angle = (time * 4 + i * Math.PI / 4) % (Math.PI * 2);
+            const barrierX = Math.cos(angle) * 12;
+            const barrierY = Math.sin(angle) * 12;
+            
+            ctx.fillStyle = powerup.color;
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            ctx.arc(barrierX, barrierY, 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          break;
+          
+        case 'length':
+          // Expanding plus with energy waves
+          ctx.fillRect(-2, -10, 4, 20);
+          ctx.fillRect(-10, -2, 20, 4);
+          
+          // Energy waves
+          for (let wave = 0; wave < 4; wave++) {
+            const waveSize = 8 + Math.sin(time * 5 + wave) * 4;
+            ctx.strokeStyle = powerup.color;
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.5 - wave * 0.1;
+            ctx.beginPath();
+            ctx.rect(-waveSize, -waveSize, waveSize * 2, waveSize * 2);
+            ctx.stroke();
+          }
           break;
       }
       
+      ctx.restore();
+      ctx.globalAlpha = 1;
       ctx.shadowBlur = 0;
     });
 
