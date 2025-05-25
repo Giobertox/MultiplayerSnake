@@ -1,15 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { GameState, GameStatus } from '@/types/game';
 import { Button } from '@/components/ui/button';
+import { Particle } from '@/hooks/useParticles';
 
 interface GameCanvasProps {
   gameState: GameState;
   gameStatus: GameStatus;
+  particles: Particle[];
   onStartGame: (playerCount: number) => void;
   onRestartGame: () => void;
 }
 
-export function GameCanvas({ gameState, gameStatus, onStartGame, onRestartGame }: GameCanvasProps) {
+export function GameCanvas({ gameState, gameStatus, particles, onStartGame, onRestartGame }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -39,18 +41,25 @@ export function GameCanvas({ gameState, gameStatus, onStartGame, onRestartGame }
       ctx.stroke();
     }
 
-    // Render snakes
+    // Render snakes with enhanced effects
     gameState.players.forEach(player => {
       if (!player.isAlive) return;
       
       ctx.fillStyle = player.color;
       
-      // Add glow effect for invincible players
+      // Enhanced effects for power-ups
       if (player.powerups.invincible > 0) {
         ctx.shadowColor = player.color;
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 25;
+        // Pulsing effect
+        const pulse = Math.sin(Date.now() * 0.01) * 0.3 + 0.7;
+        ctx.globalAlpha = pulse;
+      } else if (player.powerups.speed > 0) {
+        ctx.shadowColor = '#ffff00';
+        ctx.shadowBlur = 15;
       } else {
-        ctx.shadowBlur = 0;
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = player.color;
       }
       
       player.segments.forEach((segment, index) => {
@@ -58,15 +67,30 @@ export function GameCanvas({ gameState, gameStatus, onStartGame, onRestartGame }
         const y = segment.y * gameState.gridSize;
         
         if (index === 0) {
-          // Head - slightly larger
-          ctx.fillRect(x + 2, y + 2, gameState.gridSize - 4, gameState.gridSize - 4);
+          // Head - enhanced with eyes and direction indicator
+          const headSize = gameState.gridSize - 2;
+          ctx.fillRect(x + 1, y + 1, headSize, headSize);
+          
+          // Add eyes to the head
+          ctx.fillStyle = '#ffffff';
+          const eyeSize = 3;
+          const eyeOffset = 4;
+          ctx.fillRect(x + eyeOffset, y + eyeOffset, eyeSize, eyeSize);
+          ctx.fillRect(x + gameState.gridSize - eyeOffset - eyeSize, y + eyeOffset, eyeSize, eyeSize);
+          
+          // Reset color for body
+          ctx.fillStyle = player.color;
         } else {
-          // Body
-          ctx.fillRect(x + 3, y + 3, gameState.gridSize - 6, gameState.gridSize - 6);
+          // Body with gradient effect
+          const bodyAlpha = 1 - (index / player.segments.length) * 0.3;
+          ctx.globalAlpha = bodyAlpha;
+          const bodySize = gameState.gridSize - 4;
+          ctx.fillRect(x + 2, y + 2, bodySize, bodySize);
         }
       });
       
       ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
     });
 
     // Render food
@@ -122,7 +146,52 @@ export function GameCanvas({ gameState, gameStatus, onStartGame, onRestartGame }
       
       ctx.shadowBlur = 0;
     });
-  }, [gameState]);
+
+    // Render particles with amazing effects
+    if (particles && particles.length > 0) {
+      particles.forEach(particle => {
+      const alpha = particle.life / particle.maxLife;
+      ctx.globalAlpha = alpha;
+      
+      ctx.fillStyle = particle.color;
+      ctx.shadowColor = particle.color;
+      ctx.shadowBlur = particle.size * 2;
+      
+      if (particle.type === 'explosion') {
+        // Explosion particles - expanding circles
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * (1 - alpha), 0, Math.PI * 2);
+        ctx.fill();
+      } else if (particle.type === 'sparkle') {
+        // Sparkle particles - twinkling stars
+        const size = particle.size * alpha;
+        ctx.fillRect(particle.x - size/2, particle.y - size/2, size, size);
+        // Add cross sparkle effect
+        ctx.fillRect(particle.x - size, particle.y - 1, size * 2, 2);
+        ctx.fillRect(particle.x - 1, particle.y - size, 2, size * 2);
+      } else if (particle.type === 'powerup') {
+        // Power-up particles - glowing orbs
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * alpha, 0, Math.PI * 2);
+        ctx.fill();
+        // Add inner glow
+        ctx.globalAlpha = alpha * 0.5;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * alpha * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // Default particle
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * alpha, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+      });
+    }
+  }, [gameState, particles]);
 
   const showOverlay = gameStatus === 'waiting' || gameStatus === 'gameOver';
 

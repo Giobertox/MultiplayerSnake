@@ -465,6 +465,7 @@ export function useGame() {
   return {
     gameState,
     gameStatus,
+    particles,
     startGame,
     togglePause,
     restartGame

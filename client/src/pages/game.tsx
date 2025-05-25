@@ -4,7 +4,7 @@ import { GameCanvas } from '@/components/game/GameCanvas';
 import { GameSidebar } from '@/components/game/GameSidebar';
 
 export default function Game() {
-  const { gameState, gameStatus, startGame, togglePause, restartGame } = useGame();
+  const { gameState, gameStatus, particles, startGame, togglePause, restartGame } = useGame();
 
   return (
     <div className="min-h-screen bg-game-bg text-white font-orbitron overflow-hidden">
@@ -14,6 +14,7 @@ export default function Game() {
         <GameCanvas 
           gameState={gameState}
           gameStatus={gameStatus}
+          particles={particles}
           onStartGame={startGame}
           onRestartGame={restartGame}
         />
